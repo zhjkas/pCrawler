@@ -9,10 +9,10 @@ if __name__ == '__main__':
     executable_path = input()  # r'D:\1code\pivixCrawler\edgedriver\msedgedriver.exe'
     # 用户名
     print("用户名")
-    username = input()  # 'zhonghualinjiang@gmail.com'
+    username = input()  # ''
     # 密码
     print("密码")
-    password = input()  # 'nSVbHsc-J-!BGu6'
+    password = input()  # ''
     # 下载那一天的排行榜
     print("下载那一天的排行榜 eg:20220603")
     data = input()  # 20220601
