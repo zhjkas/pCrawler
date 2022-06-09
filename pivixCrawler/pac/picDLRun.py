@@ -12,11 +12,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # 请求网站进行下载
 class DownloadRun:
     def __init__(self, filepath, execute_path, username, password):
-        self.filepath = filepath
         self.base_url = 'https://www.pixiv.net'
+        self.filepath = filepath
+        self.exePath = execute_path
         self.userName = username
         self.pwd = password
-        self.exePath = execute_path
 
     @staticmethod
     def get_DL(f_url, cookie, userAgent, path, b):
@@ -30,6 +30,7 @@ class DownloadRun:
             try:
                 f_url1 = f_url + '_p0.jpg'
                 response = requests.get(f_url1, verify=False, headers=headers, cookies=cookie)
+                print(response)
                 if response.status_code == 404:
                     f_url2 = f_url + '_p0.png'
                     response = requests.get(f_url2, verify=False, headers=headers, cookies=cookie)
@@ -37,12 +38,13 @@ class DownloadRun:
                         print("这是张动态图片无法下载,可以前往该url查看:" + "https://www.pixiv.net/artworks/" + pic_name + "\n")
                         return True
                     else:
-                        with open(path + '/' + str(pic_name) + '.png', 'wb') as f:
+                        with open(path + '\\' + str(pic_name) + '.png', 'wb') as f:
                             f.write(response.content)
                             print("第" + str(b) + "张图片已下载成功,图片的编号：%s\n图片url：%s\n" % (pic_name, f_url2))
                             return True
                 else:
-                    with open(path + '/' + str(pic_name) + '.jpg', 'wb') as f:
+                    print(path + '\\' + str(pic_name) + '.jpg')
+                    with open(path + '\\' + str(pic_name) + '.jpg', 'wb') as f:
                         f.write(response.content)
                         print("第" + str(b) + "张图片已下载成功,图片的编号：%s\n图片url：%s\n" % (pic_name, f_url1))
                         return True
@@ -83,6 +85,7 @@ class DownloadRun:
         # useragent随机生成
         agent = UserAgent(verify_ssl=False).random
         if self.userName != '':
+            print(self.exePath)
             # 调用封装好的登录类
             login = PixivLogin(
                 "https://accounts.pixiv.net/login?return_to=https%3A%2F%2Fwww.pixiv.net%2F&lang=zh&source=pc&view_type=page",
@@ -104,6 +107,7 @@ class DownloadRun:
             for i in urls:
                 fragment = i[40:73]
                 url = 'https://i.pximg.net/img-original' + fragment
+                print(url)
                 a += 1
                 r = random.randint(1, 3)
                 time.sleep(r)
