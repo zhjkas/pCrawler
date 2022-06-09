@@ -1,5 +1,5 @@
-from pac.pixLogin import PixivLogin
 import json
+import logging
 import random
 import time
 import requests
@@ -11,12 +11,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 请求网站进行下载
 class DownloadRun:
-    def __init__(self, filepath, execute_path, username, password):
+    def __init__(self, filepath, execute_path, username, password, cookies):
         self.base_url = 'https://www.pixiv.net'
         self.filepath = filepath
         self.exePath = execute_path
         self.userName = username
         self.pwd = password
+        self.cookies = cookies
+        # useragent随机生成
+        self.agent = UserAgent(verify_ssl=False).random
 
     @staticmethod
     def get_DL(f_url, cookie, userAgent, path, b):
@@ -30,7 +33,7 @@ class DownloadRun:
             try:
                 f_url1 = f_url + '_p0.jpg'
                 response = requests.get(f_url1, verify=False, headers=headers, cookies=cookie)
-                print(response)
+                logging.debug(response)
                 if response.status_code == 404:
                     f_url2 = f_url + '_p0.png'
                     response = requests.get(f_url2, verify=False, headers=headers, cookies=cookie)
@@ -43,7 +46,6 @@ class DownloadRun:
                             print("第" + str(b) + "张图片已下载成功,图片的编号：%s\n图片url：%s\n" % (pic_name, f_url2))
                             return True
                 else:
-                    print(path + '\\' + str(pic_name) + '.jpg')
                     with open(path + '\\' + str(pic_name) + '.jpg', 'wb') as f:
                         f.write(response.content)
                         print("第" + str(b) + "张图片已下载成功,图片的编号：%s\n图片url：%s\n" % (pic_name, f_url1))
@@ -81,24 +83,6 @@ class DownloadRun:
                     return the_urls
 
     def download(self, data):
-        cookies = {}
-        # useragent随机生成
-        agent = UserAgent(verify_ssl=False).random
-        if self.userName != '':
-            print(self.exePath)
-            # 调用封装好的登录类
-            login = PixivLogin(
-                "https://accounts.pixiv.net/login?return_to=https%3A%2F%2Fwww.pixiv.net%2F&lang=zh&source=pc&view_type=page",
-                self.exePath
-            )
-            # 你的账号和密码
-            login.handle_login(self.userName, self.pwd)
-            cookies = login.get_cookie()
-            agent = login.get_agent()
-            print("cookie:", cookies)
-            print("useragent:", agent)
-            login.quit()
-        # 下载排行榜的日期
         a = 0
         for num in range(1, 11):
             urls = self.edge_running(num, self.base_url, data)
@@ -107,11 +91,10 @@ class DownloadRun:
             for i in urls:
                 fragment = i[40:73]
                 url = 'https://i.pximg.net/img-original' + fragment
-                print(url)
                 a += 1
                 r = random.randint(1, 3)
                 time.sleep(r)
-                if self.get_DL(url, cookies, agent, self.filepath, a):
+                if self.get_DL(url, self.cookies, self.agent, self.filepath, a):
                     time.sleep(0.5)
                 else:
                     return False
